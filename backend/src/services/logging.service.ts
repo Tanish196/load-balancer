@@ -3,11 +3,13 @@ import { RequestLog } from '../types/index.js';
 import crypto from 'crypto';
 
 class LoggingService {
-  public logRequest(clientIp: string, routedTo: string): RequestLog {
+  public logRequest(clientIp: string, routedTo: string, hash?: number, virtualNode?: string): RequestLog {
     const logEntry: RequestLog = {
       id: crypto.randomUUID(),
       timestamp: new Date().toISOString(),
       clientIp,
+      hash,
+      virtualNode,
       routedTo,
     };
 

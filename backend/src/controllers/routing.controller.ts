@@ -3,8 +3,14 @@ import { routingService } from '../services/routing.service.js';
 import { loggingService } from '../services/logging.service.js';
 import { simulationService } from '../services/simulation.service.js';
 import { RouteRequestDTO, SimulateRequestDTO } from '../dto/index.js';
+import { consistentHashingBalancer } from '../algorithms/consistent-hashing.js';
 
 class RoutingController {
+  public getRing(_req: Request, res: Response): void {
+    const ringData = consistentHashingBalancer.getRingData();
+    res.status(200).json({ success: true, count: ringData.length, data: ringData });
+  }
+
   public getNodes(_req: Request, res: Response): void {
     const nodes = routingService.getNodes();
     res.status(200).json({ success: true, data: nodes });
