@@ -13,7 +13,37 @@ class RoutingController {
 
   public getNodes(_req: Request, res: Response): void {
     const nodes = routingService.getNodes();
-    res.status(200).json({ success: true, data: nodes });
+    res.status(200).json({ success: true, count: nodes.length, data: nodes });
+  }
+
+  public addNode(req: Request, res: Response): void {
+    try {
+      const { id } = req.body;
+      const newNode = routingService.addNode(id);
+      res.status(201).json({ success: true, data: newNode });
+    } catch (error: any) {
+      if (error.name === 'ConflictError') {
+        res.status(409).json({ success: false, message: error.message });
+      } else {
+        res.status(500).json({ success: false, message: 'Internal Server Error' });
+      }
+    }
+  }
+
+  public removeNode(req: Request, res: Response): void {
+    try {
+      const id = req.params.id as string;
+      routingService.removeNode(id);
+      res.status(200).json({ success: true, message: `Node ${id} successfully removed.` });
+    } catch (error: any) {
+      if (error.name === 'NotFoundError') {
+        res.status(404).json({ success: false, message: error.message });
+      } else if (error.name === 'ValidationError') {
+        res.status(400).json({ success: false, message: error.message });
+      } else {
+        res.status(500).json({ success: false, message: 'Internal Server Error' });
+      }
+    }
   }
 
   public getLogs(_req: Request, res: Response): void {
@@ -33,11 +63,20 @@ class RoutingController {
 
   public simulateTraffic(req: Request<{}, {}, SimulateRequestDTO>, res: Response): void {
     try {
-      const count = req.body.count || 10; // Default to 10 if not provided
+      const count = req.body.count || 10;
       const result = simulationService.simulateTraffic(count);
       res.status(200).json({ success: true, data: result });
     } catch (error: any) {
       res.status(400).json({ success: false, message: error.message });
+    }
+  }
+
+  public proveRedistribution(_req: Request, res: Response): void {
+    try {
+      const result = simulationService.proveMinimalRedistribution();
+      res.status(200).json({ success: true, data: result });
+    } catch (error: any) {
+      res.status(500).json({ success: false, message: error.message });
     }
   }
 }

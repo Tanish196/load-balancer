@@ -12,3 +12,8 @@ export interface RouteResponseDTO {
   routedTo: string;
   timestamp: string;
 }
+
+export interface AddNodeRequestDTO {
+  id: string;
+}
+
