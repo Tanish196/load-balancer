@@ -2,6 +2,7 @@ import express, { Application } from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
 import healthRoutes from './routes/health.routes.js';
+import routingRoutes from './routes/routing.routes.js';
 
 const app: Application = express();
 
@@ -11,8 +12,8 @@ app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Routes
-app.use('/api', healthRoutes);
+app.use('/api/v1', healthRoutes);
+app.use('/api/v1', routingRoutes);
 
 // Global Error Handler (to be expanded later)
 app.use((_req, res) => {
