@@ -12,6 +12,7 @@ router.delete('/nodes/:id', routingController.removeNode);
 router.patch('/nodes/:id/healthy', routingController.markNodeHealthy);
 router.patch('/nodes/:id/unhealthy', routingController.markNodeUnhealthy);
 
+router.get('/metrics', routingController.getMetrics);
 router.get('/logs', routingController.getLogs);
 router.post('/route', routingController.routeRequest);
 router.post('/simulate', routingController.simulateTraffic);

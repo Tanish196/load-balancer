@@ -2,10 +2,19 @@ import { Request, Response } from 'express';
 import { routingService } from '../services/routing.service.js';
 import { loggingService } from '../services/logging.service.js';
 import { simulationService } from '../services/simulation.service.js';
+import { metricsService } from '../services/metrics.service.js';
 import { RouteRequestDTO, SimulateRequestDTO } from '../dto/index.js';
 import { consistentHashingBalancer } from '../algorithms/consistent-hashing.js';
 
 class RoutingController {
+  public getMetrics(_req: Request, res: Response): void {
+    try {
+      const metrics = metricsService.getMetrics();
+      res.status(200).json({ success: true, data: metrics });
+    } catch (error: any) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  }
   public getRing(_req: Request, res: Response): void {
     const ringData = consistentHashingBalancer.getRingData();
     res.status(200).json({ success: true, count: ringData.length, data: ringData });
