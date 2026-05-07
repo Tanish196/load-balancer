@@ -70,6 +70,27 @@ class RoutingService {
 
     consistentHashingBalancer.removeNode(id);
   }
+
+  public setNodeStatus(id: string, status: 'healthy' | 'unhealthy'): ServerNode {
+    const node = nodeRegistry.getById(id);
+    if (!node) {
+      const error = new Error('Node not found.');
+      error.name = 'NotFoundError';
+      throw error;
+    }
+
+    if (node.status !== status) {
+      nodeRegistry.updateStatus(id, status);
+
+      if (status === 'unhealthy') {
+        consistentHashingBalancer.removeNode(id);
+      } else if (status === 'healthy') {
+        consistentHashingBalancer.addNode(node);
+      }
+    }
+
+    return node;
+  }
 }
 
 export const routingService = new RoutingService();

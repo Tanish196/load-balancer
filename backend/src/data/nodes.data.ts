@@ -23,6 +23,13 @@ class NodeRegistry {
   public remove(id: string): void {
     this.nodes = this.nodes.filter((n) => n.id !== id);
   }
+
+  public updateStatus(id: string, status: ServerNode['status']): void {
+    const node = this.getById(id);
+    if (node) {
+      node.status = status;
+    }
+  }
 }
 
 export const nodeRegistry = new NodeRegistry();

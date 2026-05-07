@@ -75,6 +75,47 @@ class SimulationService {
       distributionAfterAddingNodeD: afterCounts,
     };
   }
+
+  public simulateFailover(): any {
+    // 1. Initial State: Distribute 1000 requests
+    const initialDistribution: Record<string, number> = {};
+    for (let i = 0; i < 1000; i++) {
+      const result = routingService.routeRequest();
+      initialDistribution[result.routedTo] = (initialDistribution[result.routedTo] || 0) + 1;
+    }
+
+    // 2. Failover: Mark Node-B as unhealthy (if it exists)
+    const nodeBExists = routingService.getNodes().find((n) => n.id === 'Node-B');
+    let failoverDistribution: Record<string, number> = {};
+    
+    if (nodeBExists) {
+      routingService.setNodeStatus('Node-B', 'unhealthy');
+
+      // Distribute 1000 requests again
+      for (let i = 0; i < 1000; i++) {
+        const result = routingService.routeRequest();
+        failoverDistribution[result.routedTo] = (failoverDistribution[result.routedTo] || 0) + 1;
+      }
+
+      // 3. Recovery: Mark Node-B as healthy again
+      routingService.setNodeStatus('Node-B', 'healthy');
+    }
+
+    // 4. Recovery Distribution: Distribute 1000 requests again
+    const recoveryDistribution: Record<string, number> = {};
+    for (let i = 0; i < 1000; i++) {
+      const result = routingService.routeRequest();
+      recoveryDistribution[result.routedTo] = (recoveryDistribution[result.routedTo] || 0) + 1;
+    }
+
+    return {
+      totalSimulatedRequestsPerPhase: 1000,
+      phase1_HealthyCluster: initialDistribution,
+      phase2_NodeBFails: failoverDistribution,
+      phase3_NodeBRecovers: recoveryDistribution,
+      explanation: 'Notice that during Phase 2, Node-B receives 0 traffic and its load is gracefully redistributed. In Phase 3, Node-B comes back online and instantly resumes handling its traffic share.',
+    };
+  }
 }
 
 export const simulationService = new SimulationService();

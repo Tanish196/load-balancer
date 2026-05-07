@@ -46,6 +46,34 @@ class RoutingController {
     }
   }
 
+  public markNodeHealthy(req: Request, res: Response): void {
+    try {
+      const id = req.params.id as string;
+      const node = routingService.setNodeStatus(id, 'healthy');
+      res.status(200).json({ success: true, data: node });
+    } catch (error: any) {
+      if (error.name === 'NotFoundError') {
+        res.status(404).json({ success: false, message: error.message });
+      } else {
+        res.status(500).json({ success: false, message: 'Internal Server Error' });
+      }
+    }
+  }
+
+  public markNodeUnhealthy(req: Request, res: Response): void {
+    try {
+      const id = req.params.id as string;
+      const node = routingService.setNodeStatus(id, 'unhealthy');
+      res.status(200).json({ success: true, data: node });
+    } catch (error: any) {
+      if (error.name === 'NotFoundError') {
+        res.status(404).json({ success: false, message: error.message });
+      } else {
+        res.status(500).json({ success: false, message: 'Internal Server Error' });
+      }
+    }
+  }
+
   public getLogs(_req: Request, res: Response): void {
     const logs = loggingService.getAllLogs();
     res.status(200).json({ success: true, data: logs });
@@ -74,6 +102,15 @@ class RoutingController {
   public proveRedistribution(_req: Request, res: Response): void {
     try {
       const result = simulationService.proveMinimalRedistribution();
+      res.status(200).json({ success: true, data: result });
+    } catch (error: any) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  }
+
+  public simulateFailover(_req: Request, res: Response): void {
+    try {
+      const result = simulationService.simulateFailover();
       res.status(200).json({ success: true, data: result });
     } catch (error: any) {
       res.status(500).json({ success: false, message: error.message });
