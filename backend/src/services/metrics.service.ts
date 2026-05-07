@@ -2,11 +2,17 @@ import { loggingService } from './logging.service.js';
 import { nodeRegistry } from '../data/nodes.data.js';
 import { consistentHashingBalancer } from '../algorithms/consistent-hashing.js';
 import { config } from '../config/index.js';
+import { rateLimitMetrics } from '../middlewares/rate-limiter.middleware.js';
 
 export interface NodeMetrics {
   weight: number;
   virtualNodes: number;
   requests: number;
+}
+
+export interface SecurityMetrics {
+  blockedRequests: number;
+  activeLimitedIPs: number;
 }
 
 export interface SystemMetrics {
@@ -15,6 +21,7 @@ export interface SystemMetrics {
   healthyNodes: number;
   unhealthyNodes: number;
   ringSize: number;
+  security: SecurityMetrics;
 }
 
 class MetricsService {
@@ -58,6 +65,10 @@ class MetricsService {
       healthyNodes: healthyCount,
       unhealthyNodes: unhealthyCount,
       ringSize: ring.length,
+      security: {
+        blockedRequests: rateLimitMetrics.blockedRequests,
+        activeLimitedIPs: rateLimitMetrics.getActiveLimitedIPs(),
+      }
     };
   }
 }
