@@ -27,12 +27,27 @@ class RoutingController {
 
   public addNode(req: Request, res: Response): void {
     try {
-      const { id } = req.body;
-      const newNode = routingService.addNode(id);
+      const { id, weight } = req.body;
+      const newNode = routingService.addNode(id, weight);
       res.status(201).json({ success: true, data: newNode });
     } catch (error: any) {
       if (error.name === 'ConflictError') {
         res.status(409).json({ success: false, message: error.message });
+      } else {
+        res.status(500).json({ success: false, message: 'Internal Server Error' });
+      }
+    }
+  }
+
+  public updateNodeWeight(req: Request, res: Response): void {
+    try {
+      const id = req.params.id as string;
+      const { weight } = req.body;
+      const node = routingService.setNodeWeight(id, weight);
+      res.status(200).json({ success: true, data: node });
+    } catch (error: any) {
+      if (error.name === 'NotFoundError') {
+        res.status(404).json({ success: false, message: error.message });
       } else {
         res.status(500).json({ success: false, message: 'Internal Server Error' });
       }
@@ -120,6 +135,15 @@ class RoutingController {
   public simulateFailover(_req: Request, res: Response): void {
     try {
       const result = simulationService.simulateFailover();
+      res.status(200).json({ success: true, data: result });
+    } catch (error: any) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  }
+
+  public simulateWeightedRouting(_req: Request, res: Response): void {
+    try {
+      const result = simulationService.simulateWeightedRouting();
       res.status(200).json({ success: true, data: result });
     } catch (error: any) {
       res.status(500).json({ success: false, message: error.message });

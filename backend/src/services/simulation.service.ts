@@ -116,6 +116,35 @@ class SimulationService {
       explanation: 'Notice that during Phase 2, Node-B receives 0 traffic and its load is gracefully redistributed. In Phase 3, Node-B comes back online and instantly resumes handling its traffic share.',
     };
   }
+
+  public simulateWeightedRouting(): any {
+    // Note: We assume Node-A and Node-B exist.
+    routingService.setNodeWeight('Node-A', 1);
+    routingService.setNodeWeight('Node-B', 1);
+
+    const initialDistribution: Record<string, number> = {};
+    for (let i = 0; i < 5000; i++) {
+      const result = routingService.routeRequest();
+      initialDistribution[result.routedTo] = (initialDistribution[result.routedTo] || 0) + 1;
+    }
+
+    routingService.setNodeWeight('Node-B', 3);
+
+    const weightedDistribution: Record<string, number> = {};
+    for (let i = 0; i < 5000; i++) {
+      const result = routingService.routeRequest();
+      weightedDistribution[result.routedTo] = (weightedDistribution[result.routedTo] || 0) + 1;
+    }
+
+    routingService.setNodeWeight('Node-B', 1);
+
+    return {
+      totalSimulatedRequestsPerPhase: 5000,
+      phase1_EqualWeights: initialDistribution,
+      phase2_NodeB_Weight3: weightedDistribution,
+      explanation: 'Notice that in Phase 1, traffic is roughly equal. In Phase 2, Node-B absorbs roughly 3x more traffic than Node-A because it has 3x more virtual nodes on the ring. Note: Consistent hashing provides probabilistic distribution, not exact percentages. Also note that weight guarantees ownership probability on the ring, not CPU/Memory fairness.',
+    };
+  }
 }
 
 export const simulationService = new SimulationService();

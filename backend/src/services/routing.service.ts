@@ -35,7 +35,7 @@ class RoutingService {
     return nodeRegistry.getAll();
   }
 
-  public addNode(id: string): ServerNode {
+  public addNode(id: string, weight: number = 1): ServerNode {
     if (nodeRegistry.getById(id)) {
       const error = new Error('Node already exists.');
       error.name = 'ConflictError';
@@ -45,7 +45,7 @@ class RoutingService {
     const newNode: ServerNode = {
       id,
       status: 'healthy',
-      weight: 1, 
+      weight, 
     };
 
     nodeRegistry.add(newNode);
@@ -86,6 +86,26 @@ class RoutingService {
         consistentHashingBalancer.removeNode(id);
       } else if (status === 'healthy') {
         consistentHashingBalancer.addNode(node);
+      }
+    }
+
+    return node;
+  }
+
+  public setNodeWeight(id: string, weight: number): ServerNode {
+    const node = nodeRegistry.getById(id);
+    if (!node) {
+      const error = new Error('Node not found.');
+      error.name = 'NotFoundError';
+      throw error;
+    }
+
+    if (node.weight !== weight) {
+      nodeRegistry.updateWeight(id, weight);
+
+      if (node.status === 'healthy') {
+        consistentHashingBalancer.removeNode(id);
+        consistentHashingBalancer.addNode(node); 
       }
     }
 

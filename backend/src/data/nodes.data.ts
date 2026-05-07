@@ -30,6 +30,13 @@ class NodeRegistry {
       node.status = status;
     }
   }
+
+  public updateWeight(id: string, weight: number): void {
+    const node = this.getById(id);
+    if (node) {
+      node.weight = weight;
+    }
+  }
 }
 
 export const nodeRegistry = new NodeRegistry();
